@@ -4,7 +4,5 @@
 public record UpdateProfileRequest(
     string Email,
     string FirstName,
-    string LastName,
-    string PhoneNumber,
-    Gender Gender
+    string LastName
 );

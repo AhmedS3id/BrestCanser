@@ -51,7 +51,7 @@ public class AuthService : IAuthService
 
 
         //return response
-        var response = new AuthorResponse(user.Id, user.Email, user.PhoneNumber, user.FirstName, user.LastName, user.Gender, token, expiresIn, refreshToken, refreshTokenExpiration);
+        var response = new AuthorResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
 
         return Result.Success(response);
     }
@@ -93,7 +93,7 @@ public class AuthService : IAuthService
         await _userManager.UpdateAsync(user);
 
 
-        var response = new AuthorResponse(user.Id, user.Email, user.PhoneNumber, user.FirstName, user.LastName, user.Gender, newToken, expiresIn, newRefreshToken, refreshTokenExpiration);
+        var response = new AuthorResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn, newRefreshToken, refreshTokenExpiration);
 
         return Result.Success(response);
     }
@@ -147,7 +147,7 @@ public class AuthService : IAuthService
 
             await _userManager.UpdateAsync(user);
 
-            var response = new AuthorResponse(user.Id, user.Email, user.PhoneNumber, user.FirstName, user.LastName, user.Gender, token, expiresIn, refreshToken, refreshTokenExpiration);
+            var response = new AuthorResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
 
             return Result.Success(response);
         }

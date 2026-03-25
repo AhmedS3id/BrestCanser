@@ -16,15 +16,5 @@ public class UpdateProfileRequestValidator : AbstractValidator<UpdateProfileRequ
                     .NotEmpty()
                     .Length(3, 250);
 
-        RuleFor(x => x.PhoneNumber)
-                    .NotEmpty()
-                    .Length(11)
-                    .WithMessage("The length of 'Phone Number' must be 11 characters.")
-                    .Matches(RegexPatterns.PhoneNumber)
-                    .WithMessage("Phone number must be a valid Egyptian phone number.");
-
-        RuleFor(x => x.Gender)
-                      .IsInEnum()
-                      .WithMessage("Gender must be Male or Female.");
-    }
+        }
 }

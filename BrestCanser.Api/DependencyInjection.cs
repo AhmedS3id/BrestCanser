@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using BrestCanser.Api.Authentication;
 using System.Text;
+using BrestCanser.Api.Persistence;
 
 namespace BrestCanser.Api;
 
