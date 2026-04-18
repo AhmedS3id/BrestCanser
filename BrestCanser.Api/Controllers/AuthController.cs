@@ -44,4 +44,28 @@ public class AuthController : ControllerBase
 
         return authorResult.IsSuccess ? Ok(authorResult.Value) : authorResult.ToProblem();
     }
+
+    [HttpPost("forget-password")]
+    public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequest request)
+    {
+        var result = await _authorService.SendResetPasswordCodeAsync(request.Email);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
+
+    [HttpPost("verify-code")]
+    public async Task<IActionResult> VerifyResetCode([FromBody] VerifyResetCodeRequest request)
+    {
+        var result = await _authorService.VerifyResetCodeAsync(request.Email, request.Code);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var result = await _authorService.ResetPasswordAsync(request.Email, request.Code, request.NewPassword);
+
+        return result.IsSuccess ? Ok() : result.ToProblem();
+    }
 }

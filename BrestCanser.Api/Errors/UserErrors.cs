@@ -15,4 +15,10 @@ public class UserErrors
 
     public static readonly Error DuplicatedEmail =
         new("User.DuplicatedEmail", "Another user with the same email is already exists", StatusCodes.Status409Conflict);
+
+    public static readonly Error InvalidCode =
+        new("Code.Invalid", "Invalid email or code", StatusCodes.Status400BadRequest);
+
+    public static readonly Error CodeReset =
+          new("Code.Invalid", "No valid reset code found or it expired", StatusCodes.Status400BadRequest);
 }

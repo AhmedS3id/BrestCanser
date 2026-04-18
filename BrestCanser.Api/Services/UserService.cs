@@ -31,7 +31,6 @@ public class UserService : IUserService
                 setters
                        .SetProperty(x => x.FirstName, request.FirstName)
                        .SetProperty(x => x.LastName, request.LastName)
-                       .SetProperty(x => x.PhoneNumber, request.PhoneNumber)
                        .SetProperty(x => x.Email, request.Email)
             );
 

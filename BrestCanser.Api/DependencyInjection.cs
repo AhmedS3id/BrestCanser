@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using BrestCanser.Api.Authentication;
 using System.Text;
+using BrestCanser.Api.Persistence;
 
 namespace BrestCanser.Api;
 
@@ -38,7 +39,8 @@ public static class DependencyInjection
     private static IServiceCollection AddAuthorConfig(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+             .AddEntityFrameworkStores<ApplicationDbContext>()
+             .AddDefaultTokenProviders();
 
         services.AddScoped<IJwtProvider, JwtProvider>();
 
