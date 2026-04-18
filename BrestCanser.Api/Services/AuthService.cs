@@ -1,5 +1,7 @@
 ﻿using BrestCanser.Api.Authentication;
+using BrestCanser.Api.Helpers;
 using BrestCanser.Api.Persistence;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Cryptography;
 using System.Text;
@@ -12,14 +14,20 @@ public class AuthService : IAuthService
     private readonly IJwtProvider _jwtProvider;
     private readonly ApplicationDbContext _context;
     private readonly ILogger<AuthService> _logger;
+    private readonly IEmailSender _emailSender;
     private readonly int _refreshTokenExpiryDays = 14;
 
-    public AuthService(UserManager<ApplicationUser> userManager, IJwtProvider jwtProvider, ApplicationDbContext context, ILogger<AuthService> logger)
+    public AuthService(UserManager<ApplicationUser> userManager,
+        IJwtProvider jwtProvider, 
+        ApplicationDbContext context, 
+        ILogger<AuthService> logger,
+        IEmailSender emailSender)
     {
         _userManager = userManager;
         _jwtProvider = jwtProvider;
         _context = context;
         _logger = logger;
+        _emailSender = emailSender;
     }
 
     public async Task<Result<AuthorResponse>> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
@@ -189,7 +197,16 @@ public class AuthService : IAuthService
 
         _logger.LogInformation("Password reset code for {Email}: {Code} expires {Expiry}", user.Email, code, entity.ExpiresAt);
 
-        //TODO: send email with 'code'(do not log in production)
+        //send email with 'code'(do not log in production)
+       
+        var emailBody = EmailBodyBuilder.GenerateEmailBody("ForgetPassword",
+        new Dictionary<string, string>
+        {
+                { "{{Code}}", code }
+        });
+
+        await _emailSender.SendEmailAsync(user.Email!, "Sakeena: Change Password", emailBody);
+
 
         return Result.Success();
     }

@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using BrestCanser.Api.Authentication;
-using System.Text;
+﻿using BrestCanser.Api.Authentication;
 using BrestCanser.Api.Persistence;
+using BrestCanser.Api.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace BrestCanser.Api;
 
@@ -28,10 +31,13 @@ public static class DependencyInjection
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IEmailSender, EmailService>();
 
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
+
+        services.Configure<MailSettings>(Configuration.GetSection(nameof(MailSettings)));
 
         return services;
     }
