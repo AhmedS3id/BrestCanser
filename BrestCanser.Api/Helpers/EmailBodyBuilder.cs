@@ -5,8 +5,8 @@ public static class EmailBodyBuilder
     public static string GenerateEmailBody(string template, Dictionary<string, string> templateModel)
     {
 
-        //var basePath = AppDomain.CurrentDomain.BaseDirectory; // production environment
-        var basePath = Directory.GetCurrentDirectory(); // development environment
+        var basePath = AppDomain.CurrentDomain.BaseDirectory; // production environment
+        //var basePath = Directory.GetCurrentDirectory(); // development environment
         var templatePath = Path.Combine(basePath, "Templates", $"{template}.html");
 
 
