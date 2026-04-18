@@ -39,7 +39,8 @@ public static class DependencyInjection
     private static IServiceCollection AddAuthorConfig(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+             .AddEntityFrameworkStores<ApplicationDbContext>()
+             .AddDefaultTokenProviders();
 
         services.AddScoped<IJwtProvider, JwtProvider>();
 
