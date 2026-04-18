@@ -1,6 +1,5 @@
 ﻿using BrestCanser.Api.Authentication;
 using BrestCanser.Api.Helpers;
-using BrestCanser.Api.Persistence;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Cryptography;
