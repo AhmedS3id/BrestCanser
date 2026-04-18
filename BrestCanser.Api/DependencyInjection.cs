@@ -1,5 +1,4 @@
 ﻿using BrestCanser.Api.Authentication;
-using BrestCanser.Api.Persistence;
 using BrestCanser.Api.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -32,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IEmailSender, EmailService>();
+        services.AddScoped<IChatService, GeminiService>();
 
 
         services.AddExceptionHandler<GlobalExceptionHandler>();

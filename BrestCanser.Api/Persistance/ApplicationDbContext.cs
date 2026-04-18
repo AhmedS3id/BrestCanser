@@ -1,7 +1,4 @@
-﻿
-using BrestCanser.Api.Extensions;
-
-namespace BrestCanser.Api.Persistence;
+﻿namespace BrestCanser.Api.Persistance;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
 {
