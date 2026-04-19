@@ -1,4 +1,5 @@
-﻿using BrestCanser.Api.Extensions;
+﻿using BrestCanser.Api.Enum;
+using BrestCanser.Api.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,8 +24,12 @@ public class PredictionHistoryController : ControllerBase
 
 		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 	}
+
+	[HttpGet("with-status")]
+	public async Task<IActionResult> GetHistoryWithStatus([FromQuery] PredictionStatus? status)
+	{
+		var result = await _historyService.GetHistoryWithStatusAsync(User.GetUserId()!, status);
+
+		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+	}
 }
-
-
-//TODO GET /api/prediction-history?page=1
-//TODO GET /api/prediction-history? status = malignant

@@ -1,5 +1,5 @@
 ﻿using BrestCanser.Api.Contracts.History;
-using Microsoft.AspNetCore.Identity;
+using BrestCanser.Api.Enum;
 
 namespace BrestCanser.Api.Services;
 
@@ -24,6 +24,27 @@ public class HistoryService : IHistoryService
 
 		var response = histories.Adapt<IEnumerable<HistoryResponse>>();
 
-		return Result.Success<IEnumerable<HistoryResponse>>(response);
+		return Result.Success(response);
+	}
+	public async Task<Result<IEnumerable<HistoryResponse>>> GetHistoryWithStatusAsync(string userId, PredictionStatus? status = null)
+	{
+		var query = _context.PredictionHistories
+			.Where(x => x.UserId == userId);
+
+		if (status.HasValue)
+		{
+			query = query.Where(x => x.Status == status.Value);
+		}
+
+		var histories = await query
+			.OrderByDescending(x => x.CreatedAt)
+			.ToListAsync();
+
+		if (!histories.Any())
+			return Result.Failure<IEnumerable<HistoryResponse>>(HistoryErrors.HistoryNotFound);
+
+		var response = histories.Adapt<IEnumerable<HistoryResponse>>();
+
+		return Result.Success(response);
 	}
 }
