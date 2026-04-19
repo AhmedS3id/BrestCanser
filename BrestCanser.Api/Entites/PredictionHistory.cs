@@ -1,4 +1,6 @@
-﻿namespace BrestCanser.Api.Entites;
+﻿using BrestCanser.Api.Enum;
+
+namespace BrestCanser.Api.Entites;
 
 public class PredictionHistory
 {
@@ -10,9 +12,7 @@ public class PredictionHistory
 
 	public double Confidence { get; set; }
 
-	public string Status { get; set; } = default!;
-
-	public string Message { get; set; } = default!;
+	public PredictionStatus Status { get; set; } 
 
 	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 	

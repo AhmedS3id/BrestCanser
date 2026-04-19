@@ -9,7 +9,7 @@ namespace BrestCanser.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Microsoft.AspNetCore.Authorization.Authorize]
-public class MLController(IMLModelClient _mLModelClient,ApplicationDbContext _context) : ControllerBase
+public class MLController(IMLModelClient _mLModelClient, ApplicationDbContext _context) : ControllerBase
 {
 	[HttpPost("")]
 	public async Task<IActionResult> UploadFile([FromForm] PredictRequest request)
@@ -20,9 +20,10 @@ public class MLController(IMLModelClient _mLModelClient,ApplicationDbContext _co
 
 
 		var history = response.Prediction.Adapt<PredictionHistory>();
-		
+
 		history.UserId = User.GetUserId()!;
 
+		//TODO : upload the file to cloudinary 
 		history.ImageUrl = "https://res.cloudinary.com/ahmedragheb/image/upload/v1774656651/female-avatar_vp22bk.png";
 
 		_context.PredictionHistories.Add(history);
