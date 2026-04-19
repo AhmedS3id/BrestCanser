@@ -1,7 +1,7 @@
-﻿using BrestCanser.Api.Contracts.MLModel;
+﻿using BrestCanser.Api.Clients.MLModel.Contracts.MLModel;
 using Refit;
 
-namespace BrestCanser.Api.Clients;
+namespace BrestCanser.Api.Clients.MLModel;
 
 public interface IMLModelClient
 {

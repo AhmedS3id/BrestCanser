@@ -1,4 +1,4 @@
-using BrestCanser.Api.Clients;
+using BrestCanser.Api.Clients.MLModel;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
