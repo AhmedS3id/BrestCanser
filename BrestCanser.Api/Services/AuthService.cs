@@ -246,6 +246,7 @@ public class AuthService : IAuthService
 
         return Result.Success();
     }
+
     public async Task<Result> ResetPasswordAsync(string email, string code, string newPassword)
     {
         var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
@@ -333,7 +334,6 @@ public class AuthService : IAuthService
         }
 
         return new string(code);
-       
     }
 
     private static string ComputeSha256Hash(string input)
