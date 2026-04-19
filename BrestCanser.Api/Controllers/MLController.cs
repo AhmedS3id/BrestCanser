@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Refit;
 
 namespace BrestCanser.Api.Controllers;
+
 [Route("api/[controller]")]
 [ApiController]
-
+[Microsoft.AspNetCore.Authorization.Authorize]
 public class MLController(IMLModelClient _mLModelClient) : ControllerBase
 {
 	[HttpPost("")]
