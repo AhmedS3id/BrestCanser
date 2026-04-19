@@ -9,98 +9,99 @@ namespace BrestCanser.Api;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration Configuration)
-    {
-        services.AddControllers();
+	public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration Configuration)
+	{
+		services.AddControllers();
 
-        services.AddMapsterConfig()
-                .AddFluentValidatonConfig()
-                .AddAuthorConfig(Configuration);
-
-
-
-        //add ConnectionString and register ApplicationDbContext
-        var connectionString = Configuration.GetConnectionString("DefaultConnection") ??
-             throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-        services.AddDbContext<ApplicationDbContext>(options
-            => options.UseSqlServer(connectionString));
+		services.AddMapsterConfig()
+				.AddFluentValidatonConfig()
+				.AddAuthorConfig(Configuration);
 
 
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IEmailSender, EmailService>();
-        services.AddScoped<IChatService, GeminiService>();
+
+		//add ConnectionString and register ApplicationDbContext
+		var connectionString = Configuration.GetConnectionString("DefaultConnection") ??
+			 throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+		services.AddDbContext<ApplicationDbContext>(options
+			=> options.UseSqlServer(connectionString));
 
 
-        services.AddExceptionHandler<GlobalExceptionHandler>();
-        services.AddProblemDetails();
-
-        services.Configure<MailSettings>(Configuration.GetSection(nameof(MailSettings)));
-
-        return services;
-    }
-
-    private static IServiceCollection AddAuthorConfig(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddIdentity<ApplicationUser, IdentityRole>()
-             .AddEntityFrameworkStores<ApplicationDbContext>()
-             .AddDefaultTokenProviders();
-
-        services.AddScoped<IJwtProvider, JwtProvider>();
+		services.AddScoped<IAuthService, AuthService>();
+		services.AddScoped<IUserService, UserService>();
+		services.AddScoped<IEmailSender, EmailService>();
+		services.AddScoped<IChatService, GeminiService>();
+		services.AddScoped<IHistoryService, HistoryService>();
 
 
-        services.AddOptions<JwtOptions>()
-            .BindConfiguration(JwtOptions.SectionName)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+		services.AddExceptionHandler<GlobalExceptionHandler>();
+		services.AddProblemDetails();
 
-        var JwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
+		services.Configure<MailSettings>(Configuration.GetSection(nameof(MailSettings)));
+
+		return services;
+	}
+
+	private static IServiceCollection AddAuthorConfig(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddIdentity<ApplicationUser, IdentityRole>()
+			 .AddEntityFrameworkStores<ApplicationDbContext>()
+			 .AddDefaultTokenProviders();
+
+		services.AddScoped<IJwtProvider, JwtProvider>();
 
 
-        services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(o =>
-        {
-            o.SaveToken = true;
-            o.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings?.key!)),
-                ValidIssuer = JwtSettings?.Issuer,
-                ValidAudience = JwtSettings?.Audience,
-            };
-        });
+		services.AddOptions<JwtOptions>()
+			.BindConfiguration(JwtOptions.SectionName)
+			.ValidateDataAnnotations()
+			.ValidateOnStart();
 
-        services.Configure<IdentityOptions>(options =>
-        {
-            options.Password.RequiredLength = 8;
-            //options.SignIn.RequireConfirmedEmail = true;
-            options.User.RequireUniqueEmail = true;
-        });
+		var JwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
 
-        return services;
-    }
-    private static IServiceCollection AddFluentValidatonConfig(this IServiceCollection services)
-    {
-        services.AddFluentValidationAutoValidation()
-            .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        return services;
-    }
+		services.AddAuthentication(options =>
+		{
+			options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+			options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+		})
+		.AddJwtBearer(o =>
+		{
+			o.SaveToken = true;
+			o.TokenValidationParameters = new TokenValidationParameters
+			{
+				ValidateIssuerSigningKey = true,
+				ValidateIssuer = true,
+				ValidateAudience = true,
+				ValidateLifetime = true,
+				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings?.key!)),
+				ValidIssuer = JwtSettings?.Issuer,
+				ValidAudience = JwtSettings?.Audience,
+			};
+		});
 
-    private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
-    {
-        var mapingconfig = TypeAdapterConfig.GlobalSettings;
-        mapingconfig.Scan(Assembly.GetExecutingAssembly());
-        services.AddSingleton<IMapper>(new Mapper(mapingconfig));
+		services.Configure<IdentityOptions>(options =>
+		{
+			options.Password.RequiredLength = 8;
+			//options.SignIn.RequireConfirmedEmail = true;
+			options.User.RequireUniqueEmail = true;
+		});
 
-        return services;
-    }
+		return services;
+	}
+	private static IServiceCollection AddFluentValidatonConfig(this IServiceCollection services)
+	{
+		services.AddFluentValidationAutoValidation()
+			.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+		return services;
+	}
+
+	private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
+	{
+		var mapingconfig = TypeAdapterConfig.GlobalSettings;
+		mapingconfig.Scan(Assembly.GetExecutingAssembly());
+		services.AddSingleton<IMapper>(new Mapper(mapingconfig));
+
+		return services;
+	}
 }
