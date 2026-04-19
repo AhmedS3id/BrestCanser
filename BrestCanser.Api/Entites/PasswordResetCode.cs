@@ -1,6 +1,4 @@
 ﻿namespace BrestCanser.Api.Entites;
-
-
 public class PasswordResetCode
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();

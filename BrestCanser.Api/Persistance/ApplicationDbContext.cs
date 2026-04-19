@@ -4,7 +4,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
 
     public DbSet<PasswordResetCode> PasswordResetCodes { get; set; }
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+	public DbSet<PredictionHistory> PredictionHistories { get; set; }
+
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
