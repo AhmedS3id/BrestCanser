@@ -9,15 +9,19 @@ public class MLService : IMLService
 	private readonly IMLModelClient _mLModelClient;
 	private readonly ApplicationDbContext _context;
 	private readonly IImageService _imageService;
+	private readonly IServiceProvider _serviceProvider;
+
 
 	public MLService(
 		IMLModelClient mLModelClient,
 		ApplicationDbContext context,
-		IImageService imageService)
+		IImageService imageService, 
+		IServiceProvider serviceProvider)
 	{
 		_mLModelClient = mLModelClient;
 		_context = context;
 		_imageService = imageService;
+		_serviceProvider = serviceProvider;
 	}
 
 	public async Task<Result<PredictionResponse>> PredictAsync(PredictRequest request, string userId, CancellationToken cancellationToken)
@@ -41,6 +45,27 @@ public class MLService : IMLService
 		_context.PredictionHistories.Add(history);
 		await _context.SaveChangesAsync(cancellationToken);
 
+		// fire & forget result notification	
+		//_ = _notificationService.SendPredictionNotificationAsync(userId, history, cancellationToken);
+		
+		_ = Task.Run(async () =>
+		{
+			try
+			{
+				using var scope = _serviceProvider.CreateScope();
+				var notificationService = scope.ServiceProvider
+					.GetRequiredService<INotificationService>();
+
+				await notificationService.SendPredictionNotificationAsync(
+					userId, history, CancellationToken.None);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Notification error: {ex.Message}");
+			}
+		});
+
 		return Result.Success(response);
 	}
+
 }

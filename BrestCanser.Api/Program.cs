@@ -1,4 +1,5 @@
 using BrestCanser.Api.Clients.MLModel;
+using BrestCanser.Api.Hubs;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,8 +30,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication(); 
+
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications"); 
 
 app.Run();
