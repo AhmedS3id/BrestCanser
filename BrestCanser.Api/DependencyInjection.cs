@@ -1,7 +1,9 @@
 ﻿using BrestCanser.Api.Authentication;
 using BrestCanser.Api.Settings;
+using MailKit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -32,12 +34,17 @@ public static class DependencyInjection
 		services.AddScoped<IEmailSender, EmailService>();
 		services.AddScoped<IChatService, GeminiService>();
 		services.AddScoped<IHistoryService, HistoryService>();
+		services.AddScoped<IImageService, ImageService>();
+		services.AddScoped<IMLService, MLService>();
 
 
 		services.AddExceptionHandler<GlobalExceptionHandler>();
 		services.AddProblemDetails();
 
 		services.Configure<MailSettings>(Configuration.GetSection(nameof(MailSettings)));
+
+		services.Configure<CloudinarySettings>(Configuration.GetSection(nameof(CloudinarySettings)));
+
 
 		return services;
 	}
