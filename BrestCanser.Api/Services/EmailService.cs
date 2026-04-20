@@ -9,47 +9,47 @@ namespace BrestCanser.Api.Services;
 
 public class EmailService : IEmailSender
 {
-    private readonly MailSettings _mailSettings;
-    private readonly ILogger<EmailService> _logger;
-    public EmailService(IOptions<MailSettings> mailSettings, ILogger<EmailService> logger)
-    {
-        _mailSettings = mailSettings.Value;
-        _logger = logger;
-    }
+	private readonly MailSettings _mailSettings;
+	private readonly ILogger<EmailService> _logger;
+	public EmailService(IOptions<MailSettings> mailSettings, ILogger<EmailService> logger)
+	{
+		_mailSettings = mailSettings.Value;
+		_logger = logger;
+	}
 
-    public async Task SendEmailAsync(string email, string subject, string htmlMessage)
-    {
-        var message = new MimeMessage
-        {
-            Sender = MailboxAddress.Parse(_mailSettings.Mail),
-            Subject = subject
-        };
+	public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+	{
+		var message = new MimeMessage
+		{
+			Sender = MailboxAddress.Parse(_mailSettings.Mail),
+			Subject = subject
+		};
 
-        message.To.Add(MailboxAddress.Parse(email));
+		message.To.Add(MailboxAddress.Parse(email));
 
-        var builder = new BodyBuilder
-        {
-            HtmlBody = htmlMessage
-        };
+		var builder = new BodyBuilder
+		{
+			HtmlBody = htmlMessage
+		};
 
-        message.Body = builder.ToMessageBody();
+		message.Body = builder.ToMessageBody();
 
-        using var smtp = new SmtpClient();
-        try
-        {
-            await smtp.ConnectAsync(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(_mailSettings.Mail, _mailSettings.Password);
-            _logger.LogInformation("Sending email to {Email}", email);
-            await smtp.SendAsync(message);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while sending email");
-            throw;
-        }
-        finally
-        {
-            await smtp.DisconnectAsync(true);
-        }
-    }
+		using var smtp = new SmtpClient();
+		try
+		{
+			await smtp.ConnectAsync(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
+			await smtp.AuthenticateAsync(_mailSettings.Mail, _mailSettings.Password);
+			_logger.LogInformation("Sending email to {Email}", email);
+			await smtp.SendAsync(message);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error while sending email");
+			throw;
+		}
+		finally
+		{
+			await smtp.DisconnectAsync(true);
+		}
+	}
 }

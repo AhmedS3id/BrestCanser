@@ -20,7 +20,7 @@ public class NotificationsController : ControllerBase
 	public async Task<IActionResult> GetNotifications()
 	{
 		var result = await _notificationService.GetNotificationsAsync(User.GetUserId()!);
-		
+
 		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 	}
 
@@ -28,7 +28,7 @@ public class NotificationsController : ControllerBase
 	public async Task<IActionResult> MarkAsRead(int id)
 	{
 		var result = await _notificationService.MarkAsReadAsync(id, User.GetUserId()!);
-		
+
 		return result.IsSuccess ? NoContent() : result.ToProblem();
 	}
 

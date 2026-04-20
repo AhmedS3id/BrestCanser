@@ -2,8 +2,8 @@
 
 
 public record ResetPasswordRequest(
-    string Email,
-    string Code,
-    string NewPassword,
-    string ConfirmPassword
+	string Email,
+	string Code,
+	string NewPassword,
+	string ConfirmPassword
 );

@@ -3,11 +3,14 @@ using BrestCanser.Api.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace BrestCanser.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
+[EnableRateLimiting(RateLimiters.GeneralPolicy)]
+
 public class PredictionHistoryController : ControllerBase
 {
 	private readonly IHistoryService _historyService;
@@ -42,6 +45,7 @@ public class PredictionHistoryController : ControllerBase
 	}
 
 	[HttpGet("report")]
+	[EnableRateLimiting(RateLimiters.SensitivePolicy)]
 	public async Task<IActionResult> GetReport()
 	{
 		var result = await _historyService.GenerateReportAsync(User.GetUserId()!);

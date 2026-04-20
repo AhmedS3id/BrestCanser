@@ -25,16 +25,18 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+	app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); 
+app.UseRateLimiter();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<NotificationHub>("/hubs/notifications"); 
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

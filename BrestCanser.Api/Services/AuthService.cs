@@ -9,344 +9,344 @@ namespace BrestCanser.Api.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IJwtProvider _jwtProvider;
-    private readonly ApplicationDbContext _context;
-    private readonly ILogger<AuthService> _logger;
-    private readonly IEmailSender _emailSender;
-    private readonly int _refreshTokenExpiryDays = 14;
+	private readonly UserManager<ApplicationUser> _userManager;
+	private readonly IJwtProvider _jwtProvider;
+	private readonly ApplicationDbContext _context;
+	private readonly ILogger<AuthService> _logger;
+	private readonly IEmailSender _emailSender;
+	private readonly int _refreshTokenExpiryDays = 14;
 
-    public AuthService(UserManager<ApplicationUser> userManager,
-        IJwtProvider jwtProvider, 
-        ApplicationDbContext context, 
-        ILogger<AuthService> logger,
-        IEmailSender emailSender)
-    {
-        _userManager = userManager;
-        _jwtProvider = jwtProvider;
-        _context = context;
-        _logger = logger;
-        _emailSender = emailSender;
-    }
+	public AuthService(UserManager<ApplicationUser> userManager,
+		IJwtProvider jwtProvider,
+		ApplicationDbContext context,
+		ILogger<AuthService> logger,
+		IEmailSender emailSender)
+	{
+		_userManager = userManager;
+		_jwtProvider = jwtProvider;
+		_context = context;
+		_logger = logger;
+		_emailSender = emailSender;
+	}
 
-    public async Task<Result<AuthorResponse>> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
-    {
-        // check user?
-        var user = await _userManager.FindByEmailAsync(email);
+	public async Task<Result<AuthorResponse>> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
+	{
+		// check user?
+		var user = await _userManager.FindByEmailAsync(email);
 
-        if (user is null)
-            return Result.Failure<AuthorResponse>(UserErrors.InvalidCredentials);
+		if (user is null)
+			return Result.Failure<AuthorResponse>(UserErrors.InvalidCredentials);
 
 
 
-        //check password
-        var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
+		//check password
+		var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
 
-        if (!isPasswordValid)
-            return Result.Failure<AuthorResponse>(UserErrors.InvalidCredentials);
+		if (!isPasswordValid)
+			return Result.Failure<AuthorResponse>(UserErrors.InvalidCredentials);
 
 
 
-        //generate jwt token
-        var (token, expiresIn) = _jwtProvider.GenerateToken(user);
+		//generate jwt token
+		var (token, expiresIn) = _jwtProvider.GenerateToken(user);
 
-        //generate jwt refresh token
-        var refreshToken = GenerateRefreshToken();
-        var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays);
+		//generate jwt refresh token
+		var refreshToken = GenerateRefreshToken();
+		var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays);
 
 
-        user.RefreshTokens.Add(new RefreshToken
-        {
-            Token = refreshToken,
-            ExpiresOn = refreshTokenExpiration
-        });
+		user.RefreshTokens.Add(new RefreshToken
+		{
+			Token = refreshToken,
+			ExpiresOn = refreshTokenExpiration
+		});
 
-        await _userManager.UpdateAsync(user);
+		await _userManager.UpdateAsync(user);
 
 
-        //return response
-        var response = new AuthorResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
+		//return response
+		var response = new AuthorResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
 
-        return Result.Success(response);
-    }
+		return Result.Success(response);
+	}
 
-    public async Task<Result<AuthorResponse>> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
-    {
-        var userId = _jwtProvider.ValidateToken(token);
+	public async Task<Result<AuthorResponse>> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+	{
+		var userId = _jwtProvider.ValidateToken(token);
 
-        if (userId is null)
-            return Result.Failure<AuthorResponse>(UserErrors.InvalidJwtToken);
+		if (userId is null)
+			return Result.Failure<AuthorResponse>(UserErrors.InvalidJwtToken);
 
 
 
 
-        var user = await _userManager.FindByIdAsync(userId);
+		var user = await _userManager.FindByIdAsync(userId);
 
-        if (user is null)
-            return Result.Failure<AuthorResponse>(UserErrors.InvalidJwtToken);
+		if (user is null)
+			return Result.Failure<AuthorResponse>(UserErrors.InvalidJwtToken);
 
 
-        var userRefreshToken = user.RefreshTokens.SingleOrDefault(t => t.Token == refreshToken && t.IsActive);
+		var userRefreshToken = user.RefreshTokens.SingleOrDefault(t => t.Token == refreshToken && t.IsActive);
 
-        if (userRefreshToken is null)
-            return Result.Failure<AuthorResponse>(UserErrors.InvalidRefreshToken);
+		if (userRefreshToken is null)
+			return Result.Failure<AuthorResponse>(UserErrors.InvalidRefreshToken);
 
 
-        userRefreshToken.RevokedOn = DateTime.UtcNow;
+		userRefreshToken.RevokedOn = DateTime.UtcNow;
 
-        var (newToken, expiresIn) = _jwtProvider.GenerateToken(user);
-        var newRefreshToken = GenerateRefreshToken();
-        var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays);
+		var (newToken, expiresIn) = _jwtProvider.GenerateToken(user);
+		var newRefreshToken = GenerateRefreshToken();
+		var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays);
 
-        user.RefreshTokens.Add(new RefreshToken
-        {
-            Token = newRefreshToken,
-            ExpiresOn = refreshTokenExpiration
-        });
+		user.RefreshTokens.Add(new RefreshToken
+		{
+			Token = newRefreshToken,
+			ExpiresOn = refreshTokenExpiration
+		});
 
-        await _userManager.UpdateAsync(user);
+		await _userManager.UpdateAsync(user);
 
 
-        var response = new AuthorResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn, newRefreshToken, refreshTokenExpiration);
+		var response = new AuthorResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn, newRefreshToken, refreshTokenExpiration);
 
-        return Result.Success(response);
-    }
+		return Result.Success(response);
+	}
 
-    public async Task<Result> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
-    {
-        var userId = _jwtProvider.ValidateToken(token);
+	public async Task<Result> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+	{
+		var userId = _jwtProvider.ValidateToken(token);
 
-        if (userId is null)
-            return Result.Failure(UserErrors.InvalidJwtToken);
+		if (userId is null)
+			return Result.Failure(UserErrors.InvalidJwtToken);
 
-        var user = await _userManager.FindByIdAsync(userId);
+		var user = await _userManager.FindByIdAsync(userId);
 
-        if (user is null)
-            return Result.Failure(UserErrors.InvalidJwtToken);
+		if (user is null)
+			return Result.Failure(UserErrors.InvalidJwtToken);
 
-        var userRefreshToken = user.RefreshTokens.SingleOrDefault(t => t.Token == refreshToken && t.IsActive);
+		var userRefreshToken = user.RefreshTokens.SingleOrDefault(t => t.Token == refreshToken && t.IsActive);
 
-        if (userRefreshToken is null)
-            return Result.Failure(UserErrors.InvalidRefreshToken);
+		if (userRefreshToken is null)
+			return Result.Failure(UserErrors.InvalidRefreshToken);
 
-        userRefreshToken.RevokedOn = DateTime.UtcNow;
+		userRefreshToken.RevokedOn = DateTime.UtcNow;
 
-        await _userManager.UpdateAsync(user);
+		await _userManager.UpdateAsync(user);
 
-        return Result.Success();
-    }
+		return Result.Success();
+	}
 
-    public async Task<Result<AuthorResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
-    {
-        var emailIsExists = await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
+	public async Task<Result<AuthorResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
+	{
+		var emailIsExists = await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
 
-        if (emailIsExists)
-            return Result.Failure<AuthorResponse>(UserErrors.DuplicatedEmail);
+		if (emailIsExists)
+			return Result.Failure<AuthorResponse>(UserErrors.DuplicatedEmail);
 
-        var user = request.Adapt<ApplicationUser>();
+		var user = request.Adapt<ApplicationUser>();
 
-        var result = await _userManager.CreateAsync(user, request.Password);
+		var result = await _userManager.CreateAsync(user, request.Password);
 
-        if (result.Succeeded)
-        {
-            var (token, expiresIn) = _jwtProvider.GenerateToken(user);
-            var refreshToken = GenerateRefreshToken();
-            var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays);
+		if (result.Succeeded)
+		{
+			var (token, expiresIn) = _jwtProvider.GenerateToken(user);
+			var refreshToken = GenerateRefreshToken();
+			var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays);
 
-            user.RefreshTokens.Add(new RefreshToken
-            {
-                Token = refreshToken,
-                ExpiresOn = refreshTokenExpiration
-            });
+			user.RefreshTokens.Add(new RefreshToken
+			{
+				Token = refreshToken,
+				ExpiresOn = refreshTokenExpiration
+			});
 
-            await _userManager.UpdateAsync(user);
+			await _userManager.UpdateAsync(user);
 
-            var response = new AuthorResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
+			var response = new AuthorResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
 
-            return Result.Success(response);
-        }
+			return Result.Success(response);
+		}
 
-        var error = result.Errors.First();
+		var error = result.Errors.First();
 
-        return Result.Failure<AuthorResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
-    }
-    public async Task<Result> SendResetPasswordCodeAsync(string email)
-    {
-        if (await _userManager.FindByEmailAsync(email) is not { } user)
-            return Result.Success();
+		return Result.Failure<AuthorResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+	}
+	public async Task<Result> SendResetPasswordCodeAsync(string email)
+	{
+		if (await _userManager.FindByEmailAsync(email) is not { } user)
+			return Result.Success();
 
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+		var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+		var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-        var code = GenerateVerificationCode(5);
-        var codeHash = ComputeSha256Hash(code + user.SecurityStamp);
+		var code = GenerateVerificationCode(5);
+		var codeHash = ComputeSha256Hash(code + user.SecurityStamp);
 
-        var entity = new PasswordResetCode
-        {
-            UserId = user.Id,
-            CodeHash = codeHash,
-            IdentityToken = encodedToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(5),
-            CreatedAt = DateTime.UtcNow,
-            Used = false
-        };
+		var entity = new PasswordResetCode
+		{
+			UserId = user.Id,
+			CodeHash = codeHash,
+			IdentityToken = encodedToken,
+			ExpiresAt = DateTime.UtcNow.AddMinutes(5),
+			CreatedAt = DateTime.UtcNow,
+			Used = false
+		};
 
-        _context.PasswordResetCodes.Add(entity);
-        await _context.SaveChangesAsync();
+		_context.PasswordResetCodes.Add(entity);
+		await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Password reset code for {Email}: {Code} expires {Expiry}", user.Email, code, entity.ExpiresAt);
+		_logger.LogInformation("Password reset code for {Email}: {Code} expires {Expiry}", user.Email, code, entity.ExpiresAt);
 
-        //send email with 'code'(do not log in production)
-       
-        var emailBody = EmailBodyBuilder.GenerateEmailBody("ForgetPassword",
-        new Dictionary<string, string>
-        {
-                { "{{Code}}", code }
-        });
+		//send email with 'code'(do not log in production)
 
-        await _emailSender.SendEmailAsync(user.Email!, "Sakeena: Change Password", emailBody);
+		var emailBody = EmailBodyBuilder.GenerateEmailBody("ForgetPassword",
+		new Dictionary<string, string>
+		{
+				{ "{{Code}}", code }
+		});
 
+		await _emailSender.SendEmailAsync(user.Email!, "Sakeena: Change Password", emailBody);
 
-        return Result.Success();
-    }
 
-    public async Task<Result> VerifyResetCodeAsync(string email, string code)
-    {
-        var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
+		return Result.Success();
+	}
 
-        if (user is null)
-            return Result.Failure(UserErrors.InvalidCode);
+	public async Task<Result> VerifyResetCodeAsync(string email, string code)
+	{
+		var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
 
+		if (user is null)
+			return Result.Failure(UserErrors.InvalidCode);
 
-        var resetEntry = await _context.PasswordResetCodes
-        .Where(x => x.UserId == user.Id && !x.Used && x.ExpiresAt > DateTime.UtcNow)
-        .OrderByDescending(x => x.CreatedAt)
-        .FirstOrDefaultAsync();
 
+		var resetEntry = await _context.PasswordResetCodes
+		.Where(x => x.UserId == user.Id && !x.Used && x.ExpiresAt > DateTime.UtcNow)
+		.OrderByDescending(x => x.CreatedAt)
+		.FirstOrDefaultAsync();
 
-        if (resetEntry is null)
-            return Result.Failure(UserErrors.CodeReset);
 
-        var providedHash = ComputeSha256Hash(code + user.SecurityStamp);
+		if (resetEntry is null)
+			return Result.Failure(UserErrors.CodeReset);
 
-        if (!string.Equals(providedHash, resetEntry.CodeHash, StringComparison.Ordinal))
-        {
-            resetEntry.Attempts = (resetEntry.Attempts) + 1;
-            if (resetEntry.Attempts >= 3)
-            {
-                resetEntry.Used = true;
-            }
+		var providedHash = ComputeSha256Hash(code + user.SecurityStamp);
 
-            await _context.SaveChangesAsync();
+		if (!string.Equals(providedHash, resetEntry.CodeHash, StringComparison.Ordinal))
+		{
+			resetEntry.Attempts = (resetEntry.Attempts) + 1;
+			if (resetEntry.Attempts >= 3)
+			{
+				resetEntry.Used = true;
+			}
 
-            return Result.Failure(UserErrors.CodeReset with { Description = "Invalid reset code" });
-        }
+			await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Password reset code verified for user {UserId}", user.Id);
+			return Result.Failure(UserErrors.CodeReset with { Description = "Invalid reset code" });
+		}
 
-        return Result.Success();
-    }
+		_logger.LogInformation("Password reset code verified for user {UserId}", user.Id);
 
-    public async Task<Result> ResetPasswordAsync(string email, string code, string newPassword)
-    {
-        var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
+		return Result.Success();
+	}
 
-        if (user is null)
-            return Result.Failure(UserErrors.InvalidCode);
+	public async Task<Result> ResetPasswordAsync(string email, string code, string newPassword)
+	{
+		var user = await _userManager.Users.SingleOrDefaultAsync(u => u.Email == email);
 
-        var resetEntry = await _context.PasswordResetCodes
-            .Where(x => x.UserId == user.Id && !x.Used && x.ExpiresAt > DateTime.UtcNow)
-            .OrderByDescending(x => x.CreatedAt)
-            .FirstOrDefaultAsync();
+		if (user is null)
+			return Result.Failure(UserErrors.InvalidCode);
 
-        if (resetEntry is null)
-            return Result.Failure(UserErrors.CodeReset);
+		var resetEntry = await _context.PasswordResetCodes
+			.Where(x => x.UserId == user.Id && !x.Used && x.ExpiresAt > DateTime.UtcNow)
+			.OrderByDescending(x => x.CreatedAt)
+			.FirstOrDefaultAsync();
 
-        var providedHash = ComputeSha256Hash(code + user.SecurityStamp);
+		if (resetEntry is null)
+			return Result.Failure(UserErrors.CodeReset);
 
-        if (!string.Equals(providedHash, resetEntry.CodeHash, StringComparison.Ordinal))
-        {
-            resetEntry.Attempts = (resetEntry.Attempts) + 1;
+		var providedHash = ComputeSha256Hash(code + user.SecurityStamp);
 
-            if (resetEntry.Attempts >= 3)
-                resetEntry.Used = true;
+		if (!string.Equals(providedHash, resetEntry.CodeHash, StringComparison.Ordinal))
+		{
+			resetEntry.Attempts = (resetEntry.Attempts) + 1;
 
-            await _context.SaveChangesAsync();
+			if (resetEntry.Attempts >= 3)
+				resetEntry.Used = true;
 
-            return Result.Failure(UserErrors.CodeReset with { Description = "Invalid reset code" });
-        }
+			await _context.SaveChangesAsync();
 
-        if (string.IsNullOrEmpty(resetEntry.IdentityToken))
-            return Result.Failure(UserErrors.CodeReset with { Description = "Reset token missing" });
+			return Result.Failure(UserErrors.CodeReset with { Description = "Invalid reset code" });
+		}
 
+		if (string.IsNullOrEmpty(resetEntry.IdentityToken))
+			return Result.Failure(UserErrors.CodeReset with { Description = "Reset token missing" });
 
-        string identityToken;
-        try
-        {
-            var tokenBytes = WebEncoders.Base64UrlDecode(resetEntry.IdentityToken);
-            identityToken = Encoding.UTF8.GetString(tokenBytes);
-        }
-        catch
-        {
-            return Result.Failure(UserErrors.CodeReset with { Description = "Malformed reset token" });
-        }
 
-        var resetResult = await _userManager.ResetPasswordAsync(user, identityToken, newPassword);
+		string identityToken;
+		try
+		{
+			var tokenBytes = WebEncoders.Base64UrlDecode(resetEntry.IdentityToken);
+			identityToken = Encoding.UTF8.GetString(tokenBytes);
+		}
+		catch
+		{
+			return Result.Failure(UserErrors.CodeReset with { Description = "Malformed reset token" });
+		}
 
-        if (!resetResult.Succeeded)
-        {
-            var error = resetResult.Errors.First();
+		var resetResult = await _userManager.ResetPasswordAsync(user, identityToken, newPassword);
 
-            return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
-        }
+		if (!resetResult.Succeeded)
+		{
+			var error = resetResult.Errors.First();
 
-        resetEntry.Used = true;
+			return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+		}
 
-        var others = await _context.PasswordResetCodes
-            .Where(x => x.UserId == user.Id && !x.Used)
-            .ToListAsync();
+		resetEntry.Used = true;
 
-        foreach (var o in others)
-            o.Used = true;
+		var others = await _context.PasswordResetCodes
+			.Where(x => x.UserId == user.Id && !x.Used)
+			.ToListAsync();
 
-        await _context.SaveChangesAsync();
+		foreach (var o in others)
+			o.Used = true;
 
-        await _userManager.UpdateSecurityStampAsync(user);
+		await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Password reset completed for user {UserId}", user.Id);
-        return Result.Success();
-    }
+		await _userManager.UpdateSecurityStampAsync(user);
 
-    private static string GenerateVerificationCode(int length = 5)
-    {
-        var code = new char[length];
-        var random = RandomNumberGenerator.GetBytes(length);
-        for (int i = 0; i < length; i++)
-        {
-            var next = AllowedNumber._allowedNumber[random[i] % AllowedNumber._allowedNumber.Length];
+		_logger.LogInformation("Password reset completed for user {UserId}", user.Id);
+		return Result.Success();
+	}
 
-            if (i > 0 && next == code[i - 1])
-            {
-                next = AllowedNumber._allowedNumber[(random[i] + 1) % AllowedNumber._allowedNumber.Length];
-            }
+	private static string GenerateVerificationCode(int length = 5)
+	{
+		var code = new char[length];
+		var random = RandomNumberGenerator.GetBytes(length);
+		for (int i = 0; i < length; i++)
+		{
+			var next = AllowedNumber._allowedNumber[random[i] % AllowedNumber._allowedNumber.Length];
 
-            code[i] = next;
-        }
+			if (i > 0 && next == code[i - 1])
+			{
+				next = AllowedNumber._allowedNumber[(random[i] + 1) % AllowedNumber._allowedNumber.Length];
+			}
 
-        return new string(code);
-    }
+			code[i] = next;
+		}
 
-    private static string ComputeSha256Hash(string input)
-    {
-        var bytes = Encoding.UTF8.GetBytes(input);
-        var hashed = SHA256.HashData(bytes);
-        return Convert.ToBase64String(hashed);
-    }
+		return new string(code);
+	}
 
-    private static string GenerateRefreshToken()
-    {
-        var refreshToken = RandomNumberGenerator.GetBytes(64);
+	private static string ComputeSha256Hash(string input)
+	{
+		var bytes = Encoding.UTF8.GetBytes(input);
+		var hashed = SHA256.HashData(bytes);
+		return Convert.ToBase64String(hashed);
+	}
 
-        return Convert.ToBase64String(refreshToken);
-    }
+	private static string GenerateRefreshToken()
+	{
+		var refreshToken = RandomNumberGenerator.GetBytes(64);
+
+		return Convert.ToBase64String(refreshToken);
+	}
 }
