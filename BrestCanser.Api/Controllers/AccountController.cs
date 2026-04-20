@@ -1,9 +1,4 @@
-﻿using BrestCanser.Api.Contracts.Users;
-using BrestCanser.Api.Extensions;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace BrestCanser.Api.Controllers;
+﻿namespace BrestCanser.Api.Controllers;
 
 [Route("/[Controller]")]
 [ApiController]

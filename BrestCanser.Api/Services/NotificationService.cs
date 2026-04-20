@@ -30,7 +30,6 @@ public class NotificationService : INotificationService
 		var user = await _context.Users.FindAsync([userId], cancellationToken);
 		if (user is null) return;
 
-		// 1. Save in-app notification
 		var notification = new Notification
 		{
 			UserId = userId,
@@ -41,14 +40,12 @@ public class NotificationService : INotificationService
 		_context.Notifications.Add(notification);
 		await _context.SaveChangesAsync(cancellationToken);
 
-		// 2. Push via SignalR (real-time)
 		var payload = notification.Adapt<NotificationResponse>();
 
 		await _hubContext.Clients
 			.Group(userId)
 			.SendAsync("ReceiveNotification", payload, cancellationToken);
 
-		// 3. Send email
 		var htmlBody = EmailBodyBuilder.GenerateEmailBody("EmailTemplates",
 	new Dictionary<string, string>
 		{

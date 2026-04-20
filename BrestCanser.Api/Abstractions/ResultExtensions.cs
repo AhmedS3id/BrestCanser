@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace BrestCanser.Api.Abstractions;
+﻿namespace BrestCanser.Api.Abstractions;
 
 public static class ResultExtensions
 {
