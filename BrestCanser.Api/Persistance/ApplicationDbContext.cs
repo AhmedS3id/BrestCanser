@@ -5,6 +5,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<PasswordResetCode> PasswordResetCodes { get; set; }
 	public DbSet<PredictionHistory> PredictionHistories { get; set; }
+	public DbSet<Notification> Notifications { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
