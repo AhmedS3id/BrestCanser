@@ -12,11 +12,11 @@ public class PredictionHistory
 
 	public double Confidence { get; set; }
 
-	public PredictionStatus Status { get; set; } 
+	public PredictionStatus Status { get; set; }
 
 	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-	
+
 	public string UserId { get; set; } = default!;
-	
+
 	public ApplicationUser User { get; set; } = default!; // Navigation property to the ApplicationUser entity
 }

@@ -2,6 +2,6 @@
 
 
 public record ChangePasswordRequest(
-    string CurrentPassword,
-    string NewPassword
+	string CurrentPassword,
+	string NewPassword
 );

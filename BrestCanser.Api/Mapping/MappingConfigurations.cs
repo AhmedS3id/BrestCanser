@@ -14,6 +14,6 @@ public class MappingConfigurations : IRegister
 			 .Map(dest => dest.CreatedAt, src => DateOnly.FromDateTime(src.CreatedAt));
 
 		config.NewConfig<Notification, NotificationResponse>()
-			.Map(dest => dest.CreatedAt,src => src.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"));
+			.Map(dest => dest.CreatedAt, src => src.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"));
 	}
 }

@@ -2,5 +2,5 @@
 
 
 public record ChatResponse(
-    string Answer
+	string Answer
 );

@@ -3,10 +3,10 @@
 
 public class ChatRequestValidator : AbstractValidator<ChatRequest>
 {
-    public ChatRequestValidator()
-    {
-        RuleFor(x => x.Prompt)
-                    .NotEmpty()
-                    .Length(3, 500);
-    }
+	public ChatRequestValidator()
+	{
+		RuleFor(x => x.Prompt)
+					.NotEmpty()
+					.Length(3, 500);
+	}
 }

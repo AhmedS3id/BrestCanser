@@ -3,5 +3,5 @@
 
 
 public record ForgetPasswordRequest(
-    string Email
+	string Email
  );

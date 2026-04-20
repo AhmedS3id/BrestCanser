@@ -15,7 +15,7 @@ public class MLService : IMLService
 	public MLService(
 		IMLModelClient mLModelClient,
 		ApplicationDbContext context,
-		IImageService imageService, 
+		IImageService imageService,
 		IServiceProvider serviceProvider)
 	{
 		_mLModelClient = mLModelClient;
@@ -47,12 +47,13 @@ public class MLService : IMLService
 
 		// fire & forget result notification	
 		//_ = _notificationService.SendPredictionNotificationAsync(userId, history, cancellationToken);
-		
+
 		_ = Task.Run(async () =>
 		{
+			using var scope = _serviceProvider.CreateScope();
+
 			try
 			{
-				using var scope = _serviceProvider.CreateScope();
 				var notificationService = scope.ServiceProvider
 					.GetRequiredService<INotificationService>();
 
@@ -61,9 +62,10 @@ public class MLService : IMLService
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Notification error: {ex.Message}");
+				var logger = scope.ServiceProvider.GetRequiredService<ILogger<MLService>>();
+				logger.LogError(ex, "Failed to send prediction notification for user {UserId}", userId);
 			}
-		});
+		}, cancellationToken);
 
 		return Result.Success(response);
 	}

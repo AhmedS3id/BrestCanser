@@ -7,6 +7,8 @@ namespace BrestCanser.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Microsoft.AspNetCore.Authorization.Authorize]
+[EnableRateLimiting(RateLimiters.SensitivePolicy)]
+
 public class MLController(IMLService _mlService) : ControllerBase
 {
 	[HttpPost("")]

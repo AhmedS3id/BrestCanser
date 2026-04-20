@@ -2,8 +2,8 @@
 
 
 public record UserProfileResponse(
-    string FirstName,
-    string LastName,
-    string Email
+	string FirstName,
+	string LastName,
+	string Email
 );
 

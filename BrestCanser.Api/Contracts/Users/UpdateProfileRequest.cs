@@ -2,7 +2,7 @@
 
 
 public record UpdateProfileRequest(
-    string Email,
-    string FirstName,
-    string LastName
+	string Email,
+	string FirstName,
+	string LastName
 );
