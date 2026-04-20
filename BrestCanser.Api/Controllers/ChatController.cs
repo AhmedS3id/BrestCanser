@@ -1,9 +1,11 @@
 ﻿using BrestCanser.Api.Contracts.Chat;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BrestCanser.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class ChatController : ControllerBase
 {
     private readonly IChatService _chatService;
