@@ -1,6 +1,5 @@
 ﻿using BrestCanser.Api.Contracts.History;
 using BrestCanser.Api.Documents;
-using BrestCanser.Api.Enum;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 

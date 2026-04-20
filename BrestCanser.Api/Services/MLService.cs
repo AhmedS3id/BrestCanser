@@ -45,9 +45,6 @@ public class MLService : IMLService
 		_context.PredictionHistories.Add(history);
 		await _context.SaveChangesAsync(cancellationToken);
 
-		// fire & forget result notification	
-		//_ = _notificationService.SendPredictionNotificationAsync(userId, history, cancellationToken);
-
 		_ = Task.Run(async () =>
 		{
 			using var scope = _serviceProvider.CreateScope();

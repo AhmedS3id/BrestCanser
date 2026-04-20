@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace BrestCanser.Api.Controllers;
+﻿namespace BrestCanser.Api.Controllers;
 
 [Route("[controller]")]
 [ApiController]

@@ -1,6 +1,4 @@
-﻿using BrestCanser.Api.Enum;
-
-namespace BrestCanser.Api.Entites;
+﻿namespace BrestCanser.Api.Entites;
 
 public class PredictionHistory
 {
