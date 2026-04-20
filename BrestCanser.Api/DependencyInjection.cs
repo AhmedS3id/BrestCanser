@@ -2,6 +2,7 @@
 using BrestCanser.Api.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -17,6 +18,8 @@ public static class DependencyInjection
 				.AddFluentValidatonConfig()
 				.AddAuthorConfig(Configuration);
 
+
+		services.AddSignalR();
 
 
 		//add ConnectionString and register ApplicationDbContext
@@ -34,6 +37,8 @@ public static class DependencyInjection
 		services.AddScoped<IHistoryService, HistoryService>();
 		services.AddScoped<IImageService, ImageService>();
 		services.AddScoped<IMLService, MLService>();
+		services.AddScoped<INotificationService, NotificationService>();
+
 
 
 		services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -81,6 +86,23 @@ public static class DependencyInjection
 				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings?.key!)),
 				ValidIssuer = JwtSettings?.Issuer,
 				ValidAudience = JwtSettings?.Audience,
+			};
+
+			o.Events = new JwtBearerEvents
+			{
+				OnMessageReceived = context =>
+				{
+					var accessToken = context.Request.Query["access_token"];
+					var path = context.HttpContext.Request.Path;
+
+					if (!string.IsNullOrEmpty(accessToken) &&
+						path.StartsWithSegments("/hubs"))
+					{
+						context.Token = accessToken;
+					}
+
+					return Task.CompletedTask;
+				}
 			};
 		});
 
