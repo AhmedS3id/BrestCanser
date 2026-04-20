@@ -47,4 +47,34 @@ public class HistoryService : IHistoryService
 
 		return Result.Success(response);
 	}
+
+	public async Task<Result<StatsResponse>> GetStatisticsAsync(string userId)
+	{
+		var histories = await _context.PredictionHistories
+			.Where(x => x.UserId == userId)
+			.ToListAsync();
+
+		if (!histories.Any())
+			return Result.Failure<StatsResponse>(HistoryErrors.HistoryNotFound);
+
+		var total = histories.Count;
+
+		var benignCount = histories.Count(x => x.Status == PredictionStatus.Benign);
+		var malignantCount = histories.Count(x => x.Status == PredictionStatus.Malignant);
+		var uncertainCount = histories.Count(x => x.Status == PredictionStatus.Uncertain);
+
+		var response = new StatsResponse(
+			 total,
+			 benignCount,
+			 malignantCount,
+			 uncertainCount,
+			 Math.Round((double)benignCount / total * 100, 2),
+			 Math.Round((double)malignantCount / total * 100, 2),
+			 Math.Round((double)uncertainCount / total * 100, 2),
+			 Math.Round(histories.Average(x => x.Confidence), 2),
+			 DateOnly.FromDateTime(histories.Max(x => x.CreatedAt))
+		);
+
+		return Result.Success(response);
+	}
 }

@@ -32,4 +32,12 @@ public class PredictionHistoryController : ControllerBase
 
 		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 	}
+
+	[HttpGet("statistics")]
+	public async Task<IActionResult> GetStatistics()
+	{
+		var result = await _historyService.GetStatisticsAsync(User.GetUserId()!);
+
+		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+	}
 }
