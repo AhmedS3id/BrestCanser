@@ -32,4 +32,23 @@ public class PredictionHistoryController : ControllerBase
 
 		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 	}
+
+	[HttpGet("statistics")]
+	public async Task<IActionResult> GetStatistics()
+	{
+		var result = await _historyService.GetStatisticsAsync(User.GetUserId()!);
+
+		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+	}
+
+	[HttpGet("report")]
+	public async Task<IActionResult> GetReport()
+	{
+		var result = await _historyService.GenerateReportAsync(User.GetUserId()!);
+
+		if (!result.IsSuccess)
+			return result.ToProblem();
+
+		return File(result.Value.FileContents, result.Value.ContentType, result.Value.FileName);
+	}
 }

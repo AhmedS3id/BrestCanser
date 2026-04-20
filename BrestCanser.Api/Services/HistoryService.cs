@@ -1,5 +1,8 @@
 ﻿using BrestCanser.Api.Contracts.History;
+using BrestCanser.Api.Documents;
 using BrestCanser.Api.Enum;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
 
 namespace BrestCanser.Api.Services;
 
@@ -44,6 +47,61 @@ public class HistoryService : IHistoryService
 			return Result.Failure<IEnumerable<HistoryResponse>>(HistoryErrors.HistoryNotFound);
 
 		var response = histories.Adapt<IEnumerable<HistoryResponse>>();
+
+		return Result.Success(response);
+	}
+
+	public async Task<Result<StatsResponse>> GetStatisticsAsync(string userId)
+	{
+		var histories = await _context.PredictionHistories
+			.Where(x => x.UserId == userId)
+			.ToListAsync();
+
+		if (!histories.Any())
+			return Result.Failure<StatsResponse>(HistoryErrors.HistoryNotFound);
+
+		var total = histories.Count;
+
+		var benignCount = histories.Count(x => x.Status == PredictionStatus.Benign);
+		var malignantCount = histories.Count(x => x.Status == PredictionStatus.Malignant);
+		var uncertainCount = histories.Count(x => x.Status == PredictionStatus.Uncertain);
+
+		var response = new StatsResponse(
+			 total,
+			 benignCount,
+			 malignantCount,
+			 uncertainCount,
+			 Math.Round((double)benignCount / total * 100, 2),
+			 Math.Round((double)malignantCount / total * 100, 2),
+			 Math.Round((double)uncertainCount / total * 100, 2),
+			 Math.Round(histories.Average(x => x.Confidence), 2),
+			 DateOnly.FromDateTime(histories.Max(x => x.CreatedAt))
+		);
+
+		return Result.Success(response);
+	}
+
+	public async Task<Result<ReportResponse>> GenerateReportAsync(string userId)
+	{
+		var histories = await _context.PredictionHistories
+			.Where(x => x.UserId == userId)
+			.Include(x => x.User)
+			.OrderByDescending(x => x.CreatedAt)
+			.ToListAsync();
+
+		if (!histories.Any())
+			return Result.Failure<ReportResponse>(HistoryErrors.NoHistoryForReport);
+
+		var firstName = histories.First().User?.FirstName;
+		var lastName = histories.First().User?.LastName;
+		var fullName = $"{firstName} {lastName}".Trim();
+
+		QuestPDF.Settings.License = LicenseType.Community;
+
+		var document = new PredictionReportDocument(histories, fullName);
+		var pdfBytes = document.GeneratePdf();
+
+		var response = new ReportResponse(pdfBytes, "application/pdf", $"report_{userId}_{DateTime.UtcNow:yyyyMMdd}.pdf");
 
 		return Result.Success(response);
 	}
