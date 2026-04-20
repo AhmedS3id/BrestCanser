@@ -35,7 +35,7 @@ public static class DependencyInjection
 		services.AddScoped<IChatService, GeminiService>();
 		services.AddScoped<IHistoryService, HistoryService>();
 		services.AddScoped<IImageService, ImageService>();
-
+		services.AddScoped<IMLService, MLService>();
 
 
 		services.AddExceptionHandler<GlobalExceptionHandler>();
