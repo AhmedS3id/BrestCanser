@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 namespace BrestCanser.Api;
@@ -12,9 +13,12 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration Configuration)
 	{
-		services.AddControllers();
+        services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
 
-		services.AddMapsterConfig()
+        services.AddMapsterConfig()
 				.AddFluentValidatonConfig()
 				.AddAuthorConfig(Configuration);
 
@@ -38,10 +42,10 @@ public static class DependencyInjection
 		services.AddScoped<IImageService, ImageService>();
 		services.AddScoped<IMLService, MLService>();
 		services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IRiskAssessmentService, RiskAssessmentService>();
+        services.AddScoped<RiskAssessmentEngine>();
 
-
-
-		services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
 		services.AddProblemDetails();
 
 		services.AddRateLimitingConfig();
@@ -50,8 +54,11 @@ public static class DependencyInjection
 
 		services.Configure<CloudinarySettings>(Configuration.GetSection(nameof(CloudinarySettings)));
 
+        services.Configure<RiskScoringOptions>(Configuration.GetSection(RiskScoringOptions.SectionName));
+        
 
-		return services;
+
+        return services;
 	}
 
 	private static IServiceCollection AddAuthorConfig(this IServiceCollection services, IConfiguration configuration)
