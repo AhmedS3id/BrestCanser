@@ -1,6 +1,4 @@
-﻿using BrestCanser.Api.Contracts.Users;
-
-namespace BrestCanser.Api.Services;
+﻿namespace BrestCanser.Api.Services;
 
 public interface IUserService
 {

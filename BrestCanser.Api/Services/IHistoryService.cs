@@ -1,5 +1,4 @@
 ﻿using BrestCanser.Api.Contracts.History;
-using BrestCanser.Api.Enum;
 
 namespace BrestCanser.Api.Services;
 

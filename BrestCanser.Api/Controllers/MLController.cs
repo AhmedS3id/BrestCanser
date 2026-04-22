@@ -1,6 +1,5 @@
 ﻿using BrestCanser.Api.Clients.MLModel.Contracts.MLModel;
-using BrestCanser.Api.Extensions;
-using Microsoft.AspNetCore.Mvc;
+
 
 namespace BrestCanser.Api.Controllers;
 

@@ -1,4 +1,4 @@
-﻿namespace Template.Api.Abstractions.Consts;
+﻿namespace BrestCanser.Api.Abstractions.Consts;
 public static class RateLimiters
 {
 	public const string GeneralPolicy = "GeneralPolicy";

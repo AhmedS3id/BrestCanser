@@ -1,8 +1,4 @@
-﻿using BrestCanser.Api.Contracts.Chat;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace BrestCanser.Api.Controllers;
+﻿namespace BrestCanser.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
