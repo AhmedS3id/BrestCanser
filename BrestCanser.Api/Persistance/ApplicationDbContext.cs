@@ -6,8 +6,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<PasswordResetCode> PasswordResetCodes { get; set; }
 	public DbSet<PredictionHistory> PredictionHistories { get; set; }
 	public DbSet<Notification> Notifications { get; set; }
+    public DbSet<RiskAssessmentHistory> RiskAssessmentHistories { get; set; }
 
-	protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 
 		modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
