@@ -129,7 +129,7 @@ namespace BrestCanser.Api.Persistance.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("BrestCanser.Api.Entites.PasswordResetCode", b =>
@@ -168,7 +168,7 @@ namespace BrestCanser.Api.Persistance.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PasswordResetCodes");
+                    b.ToTable("PasswordResetCodes", (string)null);
                 });
 
             modelBuilder.Entity("BrestCanser.Api.Entites.PredictionHistory", b =>
@@ -207,90 +207,7 @@ namespace BrestCanser.Api.Persistance.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PredictionHistories");
-                });
-
-            modelBuilder.Entity("BrestCanser.Api.Entites.RiskAssessmentHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AgeGroup")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BiopsyResult")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BmiCategory")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BrcaMutation")
-                        .HasColumnType("int");
-
-                    b.Property<string>("BreakdownFamilyHistory")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BreakdownGeneticFactors")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BreakdownLifestyle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("BreastDensity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Classification")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("EarlyFamilyDiagnosis")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Ethnicity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FamilyHistoryLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MenarcheAge")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MenopauseStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PregnancyHistory")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RadiationHistory")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reasoning")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RiskLevel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("RiskProbability")
-                        .HasColumnType("float");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RiskAssessmentHistories");
+                    b.ToTable("PredictionHistories", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
