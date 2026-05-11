@@ -4,7 +4,6 @@ using BrestCanser.Api.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using System.Security.Claims;
 
 namespace BrestCanser.Api.Controllers;
 
@@ -20,27 +19,7 @@ public class RiskAssessmentController(IRiskAssessmentService assessmentService) 
         [FromBody] RiskAssessmentRequest request,
         CancellationToken ct)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (string.IsNullOrWhiteSpace(userId))
-            return Unauthorized();
-
-        var result = await _assessmentService.AssessAsync(request, userId, ct);
-
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : result.ToProblem();
-    }
-
-    [HttpGet("history")]
-    public async Task<IActionResult> GetHistory(CancellationToken ct)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (string.IsNullOrWhiteSpace(userId))
-            return Unauthorized();
-
-        var result = await _assessmentService.GetHistoryAsync(userId, ct);
+        var result = await _assessmentService.AssessAsync(request, ct);
 
         return result.IsSuccess
             ? Ok(result.Value)

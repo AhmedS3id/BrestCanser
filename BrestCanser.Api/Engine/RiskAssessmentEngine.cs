@@ -11,9 +11,9 @@ public sealed class RiskAssessmentEngine
     private readonly int _maxScore;
 
     // Max scores per category (for normalization)
-    private const int MaxFamilyScore = 48;  // FamilyHistoryLevel + EarlyFamilyDiagnosis + interaction
-    private const int MaxLifestyleScore = 37;  // Age + BMI + Menarche + Pregnancy + Menopause + Radiation + HRT interaction
-    private const int MaxGeneticScore = 50;  // BRCA + Ethnicity + BreastDensity + Biopsy + BRCA interaction
+    private const int MaxFamilyScore = 48;
+    private const int MaxLifestyleScore = 37;
+    private const int MaxGeneticScore = 50;
 
     public RiskAssessmentEngine(IOptions<RiskScoringOptions> options)
     {
@@ -28,7 +28,6 @@ public sealed class RiskAssessmentEngine
         int familyScore = 0;
         int lifestyleScore = 0;
         int geneticScore = 0;
-        var reasons = new List<string>();
 
         // ── Helpers ──────────────────────────────────────────────────────────
         void AddTo(ref int category, string key, string reason)
@@ -39,7 +38,6 @@ public sealed class RiskAssessmentEngine
             {
                 category += w;
                 totalScore += w;
-                reasons.Add(reason);
             }
         }
 
@@ -54,7 +52,7 @@ public sealed class RiskAssessmentEngine
 
         AddTo(ref lifestyleScore, $"BmiCategory.{r.BmiCategory}", r.BmiCategory switch
         {
-            BmiCategory.Obese => "obese BMI (increased estrogen production)",
+            BmiCategory.Obese => "obese BMI",
             BmiCategory.Overweight => "overweight BMI",
             _ => string.Empty
         });
@@ -62,41 +60,41 @@ public sealed class RiskAssessmentEngine
         // ── Stage 2: Hormonal History → Lifestyle ────────────────────────────
         AddTo(ref lifestyleScore, $"MenarcheAge.{r.MenarcheAge}", r.MenarcheAge switch
         {
-            MenarcheAge.Before12 => "early menarche before age 12 (prolonged estrogen exposure)",
+            MenarcheAge.Before12 => "early menarche before age 12",
             _ => string.Empty
         });
 
         AddTo(ref lifestyleScore, $"PregnancyHistory.{r.PregnancyHistory}", r.PregnancyHistory switch
         {
-            PregnancyHistory.NeverPregnant => "nulliparity (never pregnant)",
+            PregnancyHistory.NeverPregnant => "nulliparity",
             PregnancyHistory.FirstChildAfter30 => "first pregnancy after age 30",
             _ => string.Empty
         });
 
         AddTo(ref lifestyleScore, $"MenopauseStatus.{r.MenopauseStatus}", r.MenopauseStatus switch
         {
-            MenopauseStatus.YesWithHRT => "post-menopausal with hormone replacement therapy",
-            MenopauseStatus.YesWithoutHRT => "post-menopausal status",
+            MenopauseStatus.YesWithHRT => "post-menopausal with HRT",
+            MenopauseStatus.YesWithoutHRT => "post-menopausal",
             _ => string.Empty
         });
 
         AddTo(ref lifestyleScore, $"RadiationHistory.{r.RadiationHistory}", r.RadiationHistory switch
         {
-            RadiationHistory.Yes => "prior chest wall radiation therapy",
+            RadiationHistory.Yes => "prior chest radiation",
             _ => string.Empty
         });
 
         // ── Stage 3: Family History → Family ─────────────────────────────────
         AddTo(ref familyScore, $"FamilyHistoryLevel.{r.FamilyHistoryLevel}", r.FamilyHistoryLevel switch
         {
-            FamilyHistoryLevel.MoreThanOne => "multiple relatives with breast cancer",
-            FamilyHistoryLevel.OneRelative => "one first-degree relative with breast cancer",
+            FamilyHistoryLevel.MoreThanOne => "multiple relatives",
+            FamilyHistoryLevel.OneRelative => "one first-degree relative",
             _ => string.Empty
         });
 
         AddTo(ref familyScore, $"EarlyFamilyDiagnosis.{r.EarlyFamilyDiagnosis}", r.EarlyFamilyDiagnosis switch
         {
-            EarlyFamilyDiagnosis.Yes => "family member diagnosed before age 50",
+            EarlyFamilyDiagnosis.Yes => "family diagnosis before 50",
             _ => string.Empty
         });
 
@@ -111,19 +109,19 @@ public sealed class RiskAssessmentEngine
 
         AddTo(ref geneticScore, $"BrcaMutation.{r.BrcaMutation}", r.BrcaMutation switch
         {
-            BrcaMutation.Yes => "BRCA gene mutation confirmed",
+            BrcaMutation.Yes => "BRCA mutation",
             _ => string.Empty
         });
 
         AddTo(ref geneticScore, $"BreastDensity.{r.BreastDensity}", r.BreastDensity switch
         {
-            BreastDensity.Yes => "high breast density (masks lesions, independent risk factor)",
+            BreastDensity.Yes => "high breast density",
             _ => string.Empty
         });
 
         AddTo(ref geneticScore, $"BiopsyResult.{r.BiopsyResult}", r.BiopsyResult switch
         {
-            BiopsyResult.Yes => "prior biopsy with abnormal or atypical findings",
+            BiopsyResult.Yes => "abnormal biopsy findings",
             _ => string.Empty
         });
 
@@ -135,7 +133,6 @@ public sealed class RiskAssessmentEngine
             geneticScore += bonus;
             familyScore += bonus;
             totalScore += bonus;
-            reasons.Add("compounded risk: BRCA mutation combined with multiple affected relatives");
         }
 
         if (r.EarlyFamilyDiagnosis == EarlyFamilyDiagnosis.Yes &&
@@ -144,7 +141,6 @@ public sealed class RiskAssessmentEngine
             const int bonus = 8;
             familyScore += bonus;
             totalScore += bonus;
-            reasons.Add("early family diagnosis alongside existing family history");
         }
 
         if (r.MenopauseStatus == MenopauseStatus.YesWithHRT &&
@@ -153,7 +149,6 @@ public sealed class RiskAssessmentEngine
             const int bonus = 6;
             lifestyleScore += bonus;
             totalScore += bonus;
-            reasons.Add("combined effect of HRT and obesity on estrogen levels");
         }
 
         // ── Normalize total ───────────────────────────────────────────────────
@@ -183,12 +178,14 @@ public sealed class RiskAssessmentEngine
             _ => "High"
         };
 
-        string classification = riskLevel == "High" ? "Malignant" : "Benign";
+        string classification = riskLevel == "High"
+            ? "Malignant"
+            : "Benign";
 
-        string reasoning = reasons.Count == 0
-            ? "No major high-risk factors identified."
-            : $"Risk influenced by: {string.Join(", ", reasons)}.";
-
-        return new RiskAssessmentResponse(riskLevel, probability, classification, reasoning, breakdown);
+        return new RiskAssessmentResponse(
+            riskLevel,
+            probability,
+            classification,
+            breakdown);
     }
 }
