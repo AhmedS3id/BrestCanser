@@ -56,6 +56,10 @@ public class RiskAssessmentService : IRiskAssessmentService
             RiskProbability = response.RiskProbability,
             Classification = response.Classification,
             Reasoning = response.Reasoning,
+            // Breakdown ↓
+            BreakdownFamilyHistory = response.Breakdown.FamilyHistory,
+            BreakdownLifestyle = response.Breakdown.Lifestyle,
+            BreakdownGeneticFactors = response.Breakdown.GeneticFactors,
             CreatedAt = DateTime.UtcNow
         };
 

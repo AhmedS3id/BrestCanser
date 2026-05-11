@@ -7,7 +7,7 @@ public class RiskAssessmentHistory
     public int Id { get; set; }
     public string UserId { get; set; } = string.Empty;
 
-    // Input fields
+    // Input
     public AgeGroup AgeGroup { get; set; }
     public Ethnicity Ethnicity { get; set; }
     public BmiCategory BmiCategory { get; set; }
@@ -26,6 +26,11 @@ public class RiskAssessmentHistory
     public double RiskProbability { get; set; }
     public string Classification { get; set; } = string.Empty;
     public string Reasoning { get; set; } = string.Empty;
+
+    // Breakdown
+    public string BreakdownFamilyHistory { get; set; } = string.Empty;
+    public string BreakdownLifestyle { get; set; } = string.Empty;
+    public string BreakdownGeneticFactors { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
