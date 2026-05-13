@@ -7,7 +7,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<PredictionHistory> PredictionHistories { get; set; }
 	public DbSet<Notification> Notifications { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 
 		modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
