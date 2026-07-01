@@ -72,18 +72,5 @@ public class MLService : IMLService
 		}, cancellationToken);
 
 		return Result.Success(response);
-
-		//var streamPart = new StreamPart(
-		//	request.File.OpenReadStream(),
-		//	request.File.FileName,
-		//	request.File.ContentType);
-
-		//var httpResponse = await _mLModelClient.PredictAsync(streamPart);
-
-		//var content = await httpResponse.Content.ReadAsStringAsync();
-
-		//Console.WriteLine(content);
-
-		//return Result.Failure<PredictionResponse>(MLErrors.InvalidPrediction);
 	}
 }
