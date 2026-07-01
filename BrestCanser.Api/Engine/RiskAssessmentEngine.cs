@@ -159,9 +159,9 @@ public sealed class RiskAssessmentEngine
         static string CategoryLabel(int catScore, int catMax) =>
             Math.Round(catScore / (double)catMax * 100.0, 1) switch
             {
-                < 30 => "Low",
-                < 60 => "Moderate",
-                _ => "High"
+                < 30 => "منخفض",
+                < 60 => "متوسط",
+                _ => "مرتفع"
             };
 
         var breakdown = new CategoryBreakdown(
@@ -173,14 +173,14 @@ public sealed class RiskAssessmentEngine
         // ── Risk Level ────────────────────────────────────────────────────────
         string riskLevel = probability switch
         {
-            < 30 => "Low",
-            < 60 => "Moderate",
-            _ => "High"
+            < 30 => "منخفض",
+            < 60 => "متوسط",
+            _ => "مرتفع"
         };
 
-        string classification = riskLevel == "High"
-            ? "Malignant"
-            : "Benign";
+        string classification = riskLevel == "مرتفع"
+            ? "خبيث"
+            : "حميد";
 
         return new RiskAssessmentResponse(
             riskLevel,
