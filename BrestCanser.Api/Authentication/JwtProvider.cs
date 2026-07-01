@@ -59,7 +59,7 @@ public class JwtProvider : IJwtProvider
 				ValidateIssuerSigningKey = true,
 				ValidateIssuer = false,
 				ValidateAudience = false,
-				ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero
 			}, out SecurityToken validatedToken);
 
 			var jwtToken = (JwtSecurityToken)validatedToken;
@@ -71,4 +71,31 @@ public class JwtProvider : IJwtProvider
 			return null;
 		}
 	}
+
+    public string? GetUserIdFromExpiredToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.key));
+
+        try
+        {
+            tokenHandler.ValidateToken(token, new TokenValidationParameters
+            {
+                IssuerSigningKey = symmetricSecurityKey,
+                ValidateIssuerSigningKey = true,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                ClockSkew = TimeSpan.Zero
+            }, out SecurityToken validatedToken);
+
+            var jwtToken = (JwtSecurityToken)validatedToken;
+
+            return jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }

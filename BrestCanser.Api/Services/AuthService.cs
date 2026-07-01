@@ -72,7 +72,7 @@ public class AuthService : IAuthService
 
 	public async Task<Result<AuthorResponse>> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
 	{
-		var userId = _jwtProvider.ValidateToken(token);
+		var userId = _jwtProvider.GetUserIdFromExpiredToken(token);
 
 		if (userId is null)
 			return Result.Failure<AuthorResponse>(UserErrors.InvalidJwtToken);

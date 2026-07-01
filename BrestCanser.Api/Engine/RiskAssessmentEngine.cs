@@ -154,14 +154,14 @@ public sealed class RiskAssessmentEngine
 		double probability = Math.Round(totalScore / (double)_maxScore * 100.0, 1);
 		probability = Math.Min(probability, 100.0);
 
-		// ── Category labels ───────────────────────────────────────────────────
-		static string CategoryLabel(int catScore, int catMax) =>
-			Math.Round(catScore / (double)catMax * 100.0, 1) switch
-			{
-				< 30 => "Low",
-				< 60 => "Moderate",
-				_ => "High"
-			};
+        // ── Category labels ───────────────────────────────────────────────────
+        static string CategoryLabel(int catScore, int catMax) =>
+            Math.Round(catScore / (double)catMax * 100.0, 1) switch
+            {
+                < 30 => "منخفض",
+                < 60 => "متوسط",
+                _ => "مرتفع"
+            };
 
 		var breakdown = new CategoryBreakdown(
 			FamilyHistory: CategoryLabel(familyScore, MaxFamilyScore),
@@ -169,17 +169,17 @@ public sealed class RiskAssessmentEngine
 			GeneticFactors: CategoryLabel(geneticScore, MaxGeneticScore)
 		);
 
-		// ── Risk Level ────────────────────────────────────────────────────────
-		string riskLevel = probability switch
-		{
-			< 30 => "Low",
-			< 60 => "Moderate",
-			_ => "High"
-		};
+        // ── Risk Level ────────────────────────────────────────────────────────
+        string riskLevel = probability switch
+        {
+            < 30 => "منخفض",
+            < 60 => "متوسط",
+            _ => "مرتفع"
+        };
 
-		string classification = riskLevel == "High"
-			? "Malignant"
-			: "Benign";
+        string classification = riskLevel == "مرتفع"
+            ? "خبيث"
+            : "حميد";
 
 		return new RiskAssessmentResponse(
 			riskLevel,
