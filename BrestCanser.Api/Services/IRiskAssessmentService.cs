@@ -2,7 +2,7 @@
 
 public interface IRiskAssessmentService
 {
-    Task<Result<RiskAssessmentResponse>> AssessAsync(
-        RiskAssessmentRequest request,
-        CancellationToken ct = default);
+	Task<Result<RiskAssessmentResponse>> AssessAsync(
+		RiskAssessmentRequest request,
+		CancellationToken ct = default);
 }
