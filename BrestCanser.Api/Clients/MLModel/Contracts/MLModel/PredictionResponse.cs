@@ -1,8 +1,15 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace BrestCanser.Api.Clients.MLModel.Contracts.MLModel;
-
 public record PredictionResponse(
-	[property: JsonPropertyName("prediction")] PredictionResult Prediction,
-	[property: JsonPropertyName("success")] bool Success
+
+	[property: JsonPropertyName("label")] string Label,
+
+	[property: JsonPropertyName("confidence")] double Confidence,
+
+	[property: JsonPropertyName("probabilities")]
+	ProbabilitiesResponse Probabilities,
+
+	[property: JsonPropertyName("mask")]
+	string Mask
 );

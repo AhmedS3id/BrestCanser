@@ -16,9 +16,13 @@ builder.Services
 	.AddRefitClient<IMLModelClient>()
 	.ConfigureHttpClient(c =>
 	{
-		c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("MLModel:BaseUrl")!);
-	});
+		c.BaseAddress = new Uri(
+			builder.Configuration["MLModel:BaseUrl"]!);
 
+		c.DefaultRequestHeaders.Add(
+			"X-API-Key",
+			builder.Configuration["MLModel:ApiKey"]!);
+	});
 
 var app = builder.Build();
 

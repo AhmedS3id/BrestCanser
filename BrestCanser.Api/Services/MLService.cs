@@ -11,7 +11,6 @@ public class MLService : IMLService
 	private readonly IImageService _imageService;
 	private readonly IServiceProvider _serviceProvider;
 
-
 	public MLService(
 		IMLModelClient mLModelClient,
 		ApplicationDbContext context,
@@ -26,23 +25,32 @@ public class MLService : IMLService
 
 	public async Task<Result<PredictionResponse>> PredictAsync(PredictRequest request, string userId, CancellationToken cancellationToken)
 	{
-
 		var streamPart = new StreamPart(request.File.OpenReadStream(), request.File.FileName, request.File.ContentType);
 
 		var response = await _mLModelClient.PredictAsync(streamPart);
 
-
-		if (response?.Prediction is null)
+		if (response is null)
 			return Result.Failure<PredictionResponse>(MLErrors.InvalidPrediction);
 
 		var uploadResult = await _imageService.UploadAsync(request.File, ImageFolders.ClassificationHistory, cancellationToken);
 
-		var history = response.Prediction.Adapt<PredictionHistory>();
-
-		history.UserId = userId;
-		history.ImageUrl = uploadResult.ImageUrl;
+		var history = new PredictionHistory
+		{
+			Diagnosis = response.Label,
+			Confidence = response.Confidence,
+			Status = response.Label.ToLower() switch
+			{
+				"benign" => PredictionStatus.Benign,
+				"malignant" => PredictionStatus.Malignant,
+				"normal" => PredictionStatus.Normal,
+				_ => PredictionStatus.Uncertain
+			},
+			UserId = userId,
+			ImageUrl = uploadResult.ImageUrl
+		};
 
 		_context.PredictionHistories.Add(history);
+
 		await _context.SaveChangesAsync(cancellationToken);
 
 		_ = Task.Run(async () =>
@@ -51,20 +59,18 @@ public class MLService : IMLService
 
 			try
 			{
-				var notificationService = scope.ServiceProvider
-					.GetRequiredService<INotificationService>();
+				var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
-				await notificationService.SendPredictionNotificationAsync(
-					userId, history, CancellationToken.None);
+				await notificationService.SendPredictionNotificationAsync(userId, history, CancellationToken.None);
 			}
 			catch (Exception ex)
 			{
 				var logger = scope.ServiceProvider.GetRequiredService<ILogger<MLService>>();
+
 				logger.LogError(ex, "Failed to send prediction notification for user {UserId}", userId);
 			}
 		}, cancellationToken);
 
 		return Result.Success(response);
 	}
-
 }
