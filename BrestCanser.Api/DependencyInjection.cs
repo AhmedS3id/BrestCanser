@@ -94,7 +94,7 @@ public static class DependencyInjection
 				ValidateIssuer = true,
 				ValidateAudience = true,
 				ValidateLifetime = true,
-				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings?.key!)),
+				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings?.Key!)),
 				ValidIssuer = JwtSettings?.Issuer,
 				ValidAudience = JwtSettings?.Audience,
 			};

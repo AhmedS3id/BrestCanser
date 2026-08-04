@@ -24,7 +24,7 @@ public class JwtProvider : IJwtProvider
 			new(JwtRegisteredClaimNames.Jti , Guid.NewGuid().ToString())
 		];
 
-		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.key));
+		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
 
 
 
@@ -49,7 +49,7 @@ public class JwtProvider : IJwtProvider
 	public string? ValidateToken(string token)
 	{
 		var tokenHandler = new JwtSecurityTokenHandler();
-		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.key));
+		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
 
 		try
 		{
@@ -75,7 +75,7 @@ public class JwtProvider : IJwtProvider
     public string? GetUserIdFromExpiredToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.key));
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
 
         try
         {
