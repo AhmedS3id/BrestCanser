@@ -45,10 +45,12 @@ public class AuthService : IAuthService
         if (!isPasswordValid)
             return Result.Failure<AuthorResponse>(UserErrors.InvalidCredentials);
 
+        var (userRoles, Permission) = await GetRolesAndPermissions(user, cancellationToken);
+
         user.RefreshTokens.RemoveAll(x =>
             !x.IsActive || x.ExpiresOn <= DateTime.UtcNow);
 
-        var (token, expiresIn) = _jwtProvider.GenerateToken(user);
+        var (token, expiresIn) = _jwtProvider.GenerateToken(user,userRoles,Permission);
 
         var (refreshToken, refreshTokenExpiration) =
             await CreateRefreshTokenAsync(user);
@@ -89,10 +91,12 @@ public class AuthService : IAuthService
 
 		userRefreshToken.RevokedOn = DateTime.UtcNow;
 
-		user.RefreshTokens.RemoveAll(x =>
+        var (userRoles, Permission) = await GetRolesAndPermissions(user, cancellationToken);
+
+        user.RefreshTokens.RemoveAll(x =>
 			!x.IsActive || x.ExpiresOn <= DateTime.UtcNow);
 
-		var (newToken, expiresIn) = _jwtProvider.GenerateToken(user);
+		var (newToken, expiresIn) = _jwtProvider.GenerateToken(user, userRoles, Permission);
 
 		var (newRefreshToken, refreshTokenExpiration) =
 			await CreateRefreshTokenAsync(user);
@@ -153,30 +157,31 @@ public class AuthService : IAuthService
 
         var user = request.Adapt<ApplicationUser>();
 
-        var result = await _userManager.CreateAsync(user, request.Password);
+       var result = await _userManager.CreateAsync(user, request.Password);
 
-        if (!result.Succeeded)
-        {
-            var error = result.Errors.First();
+if (!result.Succeeded)
+{
+    var error = result.Errors.First();
 
-            return Result.Failure<AuthorResponse>(
-                new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
-        }
+    return Result.Failure<AuthorResponse>(
+        new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+}
 
-        var addRoleResult = await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
+var addRoleResult = await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
 
-        if (!addRoleResult.Succeeded)
-        {
-            var error = addRoleResult.Errors.First();
+if (!addRoleResult.Succeeded)
+{
+    var error = addRoleResult.Errors.First();
 
-            return Result.Failure<AuthorResponse>(
-                new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
-        }
+    return Result.Failure<AuthorResponse>(
+        new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+}
+        var (userRoles, Permission) = await GetRolesAndPermissions(user, cancellationToken);
 
-        var (token, expiresIn) = _jwtProvider.GenerateToken(user);
+        var (token, expiresIn) = _jwtProvider.GenerateToken(user, userRoles, Permission);
 
-        var (refreshToken, refreshTokenExpiration) =
-            await CreateRefreshTokenAsync(user);
+var (refreshToken, refreshTokenExpiration) =
+    await CreateRefreshTokenAsync(user);
 
         var response = new AuthorResponse(
             user.Id,
@@ -403,4 +408,18 @@ public class AuthService : IAuthService
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync();
     }
+
+       private async Task <(IEnumerable<string> Roles,IEnumerable<string> Permission)> GetRolesAndPermissions(ApplicationUser user,CancellationToken cancellationToken)
+        {
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            var Permission = await(from r in _context.Roles
+                                   join p in _context.RoleClaims
+                                   on r.Id equals p.RoleId
+                                   where userRoles.Contains(r.Name!)
+                                   select p.ClaimValue)
+                                    .Distinct()
+                                    .ToListAsync(cancellationToken);
+            return (userRoles, Permission);
+        }
 }
