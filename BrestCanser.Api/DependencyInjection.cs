@@ -1,4 +1,5 @@
 ﻿using BrestCanser.Api.Authentication;
+using BrestCanser.Api.Authentication.Filter;
 using BrestCanser.Api.Engine;
 using BrestCanser.Api.Options;
 using BrestCanser.Api.Settings;
@@ -72,7 +73,11 @@ public static class DependencyInjection
 		services.AddScoped<IJwtProvider, JwtProvider>();
 
 
-		services.AddOptions<JwtOptions>()
+        services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
+
+        services.AddOptions<JwtOptions>()
 			.BindConfiguration(JwtOptions.SectionName)
 			.ValidateDataAnnotations()
 			.ValidateOnStart();
