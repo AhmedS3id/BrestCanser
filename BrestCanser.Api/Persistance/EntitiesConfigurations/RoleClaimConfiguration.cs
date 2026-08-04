@@ -1,26 +1,61 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BrestCanser.Api.Persistance.EntitiesConfigurations
+namespace BrestCanser.Api.Persistance.EntitiesConfigurations;
+
+public class RoleClaimConfiguration : IEntityTypeConfiguration<IdentityRoleClaim<string>>
 {
-    public class RoleClaimConfiguration : IEntityTypeConfiguration<IdentityRoleClaim<string>>
+    public void Configure(EntityTypeBuilder<IdentityRoleClaim<string>> builder)
     {
-        public void Configure(EntityTypeBuilder<IdentityRoleClaim<string>> builder)
-        {
-            var Permission = Permissions.GetAllPermissions();
-            var adminClaims = new List<IdentityRoleClaim<string>>();
-            for (int i = 0; i < Permission.Count; i++)
-            {
-                adminClaims.Add(new IdentityRoleClaim<string>
-                {
-                    Id=i+1,
-                    ClaimType=Permissions.Type,
-                    ClaimValue = Permission[i],
-                    RoleId=DefaultRoles.AdminRoleId
-                });
-            }
-            builder.HasData(adminClaims);
-            
+        var claims = new List<IdentityRoleClaim<string>>();
+        var id = 1;
 
+        // Admin -> All Permissions
+        foreach (var permission in Permissions.GetAllPermissions())
+        {
+            claims.Add(new IdentityRoleClaim<string>
+            {
+                Id = id++,
+                RoleId = DefaultRoles.AdminRoleId,
+                ClaimType = Permissions.Type,
+                ClaimValue = permission
+            });
         }
+
+        // Member -> Allowed Permissions
+        var memberPermissions = new[]
+        {
+            Permissions.GetProfile,
+            Permissions.UpdateProfile,
+            Permissions.ChangePassword,
+
+            Permissions.AskChat,
+            Permissions.RunPrediction,
+
+            Permissions.GetNotifications,
+            Permissions.MarkNotificationAsRead,
+            Permissions.MarkAllNotificationsAsRead,
+
+            Permissions.GetPredictionHistory,
+            Permissions.GetPredictionHistoryWithStatus,
+            Permissions.GetPredictionHistoryStatistics,
+            Permissions.GetPredictionHistoryReport,
+
+            Permissions.RiskAssessment
+        };
+
+        foreach (var permission in memberPermissions)
+        {
+            claims.Add(new IdentityRoleClaim<string>
+            {
+                Id = id++,
+                RoleId = DefaultRoles.MemberRoleId,
+                ClaimType = Permissions.Type,
+                ClaimValue = permission
+            });
+        }
+
+        builder.HasData(claims);
     }
 }
