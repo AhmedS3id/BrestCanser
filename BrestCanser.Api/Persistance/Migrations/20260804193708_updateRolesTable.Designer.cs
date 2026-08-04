@@ -4,6 +4,7 @@ using BrestCanser.Api.Persistance;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BrestCanser.Api.Persistance.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260804193708_updateRolesTable")]
+    partial class updateRolesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -162,7 +165,7 @@ namespace BrestCanser.Api.Persistance.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("BrestCanser.Api.Entites.PasswordResetCode", b =>
@@ -201,7 +204,7 @@ namespace BrestCanser.Api.Persistance.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PasswordResetCodes", (string)null);
+                    b.ToTable("PasswordResetCodes");
                 });
 
             modelBuilder.Entity("BrestCanser.Api.Entites.PredictionHistory", b =>
@@ -240,7 +243,7 @@ namespace BrestCanser.Api.Persistance.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PredictionHistories", (string)null);
+                    b.ToTable("PredictionHistories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
