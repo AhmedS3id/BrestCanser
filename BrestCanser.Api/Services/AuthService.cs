@@ -1,5 +1,6 @@
 ﻿using BrestCanser.Api.Authentication;
 using BrestCanser.Api.Helpers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Cryptography;
@@ -157,6 +158,16 @@ public class AuthService : IAuthService
         if (!result.Succeeded)
         {
             var error = result.Errors.First();
+
+            return Result.Failure<AuthorResponse>(
+                new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+        }
+
+        var addRoleResult = await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
+
+        if (!addRoleResult.Succeeded)
+        {
+            var error = addRoleResult.Errors.First();
 
             return Result.Failure<AuthorResponse>(
                 new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
